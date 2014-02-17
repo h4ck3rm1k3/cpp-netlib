@@ -346,13 +346,7 @@ std::future<response> client::execute(request req, request_options options) {
   }
   else {
     // TODO factory based on HTTP or HTTPS
-    if (req.is_https()) {
-      connection = std::make_shared<client_connection::ssl_connection>(pimpl_->io_service_,
-                                                                       pimpl_->options_);
-    }
-    else {
-      connection = std::make_shared<client_connection::normal_connection>(pimpl_->io_service_);
-    }
+    connection = std::make_shared<client_connection::normal_connection>(pimpl_->io_service_);
   }
   return pimpl_->execute(std::make_shared<request_helper>(connection, req, options));
 }
