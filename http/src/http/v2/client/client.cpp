@@ -22,7 +22,7 @@ namespace http {
 namespace v2 {
 using boost::asio::ip::tcp;
 
-struct request_helper {
+struct request_context {
 
   std::shared_ptr<client_connection::async_connection> connection_;
 
@@ -38,7 +38,7 @@ struct request_helper {
 
   std::uint64_t total_bytes_written_, total_bytes_read_;
 
-  request_helper(std::shared_ptr<client_connection::async_connection> connection,
+  request_context(std::shared_ptr<client_connection::async_connection> connection,
                  request request,
                  request_options options)
     : connection_(connection)
@@ -59,32 +59,32 @@ struct client::impl {
 
   ~impl() noexcept;
 
-  std::future<response> execute(std::shared_ptr<request_helper> helper);
+  std::future<response> execute(std::shared_ptr<request_context> context);
 
   void connect(const boost::system::error_code &ec,
                tcp::resolver::iterator endpoint_iterator,
-               std::shared_ptr<request_helper> helper);
+               std::shared_ptr<request_context> context);
 
   void write_request(const boost::system::error_code &ec,
-                     std::shared_ptr<request_helper> helper);
+                     std::shared_ptr<request_context> context);
 
   void read_response(const boost::system::error_code &ec,
                      std::size_t bytes_written,
-                     std::shared_ptr<request_helper> helper);
+                     std::shared_ptr<request_context> context);
 
   void read_response_status(const boost::system::error_code &ec,
                             std::size_t bytes_written,
-                            std::shared_ptr<request_helper> helper,
+                            std::shared_ptr<request_context> context,
                             std::shared_ptr<response> res);
 
   void read_response_headers(const boost::system::error_code &ec,
                              std::size_t bytes_read,
-                             std::shared_ptr<request_helper> helper,
+                             std::shared_ptr<request_context> context,
                              std::shared_ptr<response> res);
 
   void read_response_body(const boost::system::error_code &ec,
                           std::size_t bytes_read,
-                          std::shared_ptr<request_helper> helper,
+                          std::shared_ptr<request_context> context,
                           std::shared_ptr<response> res);
 
   client_options options_;
@@ -122,18 +122,18 @@ client::impl::~impl() noexcept {
   lifetime_thread_.join();
 }
 
-std::future<response> client::impl::execute(std::shared_ptr<request_helper> helper) {
-  std::future<response> res = helper->response_promise_.get_future();
+std::future<response> client::impl::execute(std::shared_ptr<request_context> context) {
+  std::future<response> res = context->response_promise_.get_future();
 
   // TODO see linearize.hpp
 
   // If there is no user-agent, provide one as a default.
-  auto user_agent = helper->request_.header("User-Agent");
+  auto user_agent = context->request_.header("User-Agent");
   if (!user_agent) {
-    helper->request_.append_header("User-Agent", options_.user_agent());
+    context->request_.append_header("User-Agent", options_.user_agent());
   }
 
-  auto url = helper->request_.url();
+  auto url = context->request_.url();
   auto host = url.host()?
     uri::string_type(std::begin(*url.host()), std::end(*url.host())) : uri::string_type();
   auto port = url.port<std::uint16_t>()? *url.port<std::uint16_t>() : 80;
@@ -141,7 +141,7 @@ std::future<response> client::impl::execute(std::shared_ptr<request_helper> help
   resolver_->async_resolve(host, port,
                            strand_.wrap([=](const boost::system::error_code &ec,
                                             tcp::resolver::iterator endpoint_iterator) {
-                                        connect(ec, endpoint_iterator, helper);
+                                        connect(ec, endpoint_iterator, context);
                                         }));
 
   return res;
@@ -149,15 +149,15 @@ std::future<response> client::impl::execute(std::shared_ptr<request_helper> help
 
 void client::impl::connect(const boost::system::error_code &ec,
                            tcp::resolver::iterator endpoint_iterator,
-                           std::shared_ptr<request_helper> helper) {
+                           std::shared_ptr<request_context> context) {
   if (ec) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
     return;
   }
 
-  auto host = helper->request_.url().host();
+  auto host = context->request_.url().host();
   tcp::endpoint endpoint(*endpoint_iterator);
-  helper->connection_->async_connect(endpoint,
+  context->connection_->async_connect(endpoint,
                                      std::string(std::begin(*host), std::end(*host)),
                                      strand_.wrap([=] (const boost::system::error_code &ec) {
                                                     if (ec && endpoint_iterator != tcp::resolver::iterator()) {
@@ -165,69 +165,69 @@ void client::impl::connect(const boost::system::error_code &ec,
                                                       // capture
                                                       auto it = endpoint_iterator;
                                                       boost::system::error_code ignore;
-                                                      connect(ignore, ++it, helper);
+                                                      connect(ignore, ++it, context);
                                                       return;
                                                     }
 
-                                                    write_request(ec, helper);
+                                                    write_request(ec, context);
                                                   }));
     }
 
 void client::impl::write_request(const boost::system::error_code &ec,
-                                 std::shared_ptr<request_helper> helper) {
+                                 std::shared_ptr<request_context> context) {
   if (ec) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
     return;
   }
 
-  std::ostream request_stream(&helper->request_buffer_);
-  request_stream << helper->request_;
+  std::ostream request_stream(&context->request_buffer_);
+  request_stream << context->request_;
   if (!request_stream) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(client_exception(client_error::invalid_request)));
+    context->response_promise_.set_exception(std::make_exception_ptr(client_exception(client_error::invalid_request)));
   }
 
   // TODO write payload to request_buffer_
 
-  helper->connection_->async_write(helper->request_buffer_,
+  context->connection_->async_write(context->request_buffer_,
                                    strand_.wrap([=] (const boost::system::error_code &ec,
                                                      std::size_t bytes_written) {
                                                 // TODO write chunked or write body
-                                                read_response(ec, bytes_written, helper);
+                                                read_response(ec, bytes_written, context);
                                                 }));
 }
 
 void client::impl::read_response(const boost::system::error_code &ec,
                                  std::size_t bytes_written,
-                                 std::shared_ptr<request_helper> helper) {
+                                 std::shared_ptr<request_context> context) {
   if (ec) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
     return;
   }
 
-  helper->total_bytes_written_ += bytes_written;
-  if (auto progress = helper->options_.progress()) {
-    progress(client_message::transfer_direction::bytes_written, helper->total_bytes_written_);
+  context->total_bytes_written_ += bytes_written;
+  if (auto progress = context->options_.progress()) {
+    progress(client_message::transfer_direction::bytes_written, context->total_bytes_written_);
   }
 
   std::shared_ptr<response> res(new response{});
-  helper->connection_->async_read_until(helper->response_buffer_,
+  context->connection_->async_read_until(context->response_buffer_,
                                         "\r\n",
                                         strand_.wrap([=] (const boost::system::error_code &ec,
                                                           std::size_t bytes_read) {
-                                                       read_response_status(ec, bytes_read, helper, res);
+                                                       read_response_status(ec, bytes_read, context, res);
                                                      }));
 }
 
 void client::impl::read_response_status(const boost::system::error_code &ec,
                                         std::size_t,
-                                        std::shared_ptr<request_helper> helper,
+                                        std::shared_ptr<request_context> context,
                                         std::shared_ptr<response> res) {
   if (ec) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
     return;
   }
 
-  std::istream is(&helper->response_buffer_);
+  std::istream is(&context->response_buffer_);
   string_type version;
   is >> version;
   unsigned int status;
@@ -239,25 +239,25 @@ void client::impl::read_response_status(const boost::system::error_code &ec,
   res->set_status(network::http::v2::status::code(status));
   res->set_status_message(boost::trim_copy(message));
 
-  helper->connection_->async_read_until(helper->response_buffer_,
+  context->connection_->async_read_until(context->response_buffer_,
                                         "\r\n\r\n",
                                         strand_.wrap([=] (const boost::system::error_code &ec,
                                                           std::size_t bytes_read) {
-                                                       read_response_headers(ec, bytes_read, helper, res);
+                                                       read_response_headers(ec, bytes_read, context, res);
                                                      }));
 }
 
 void client::impl::read_response_headers(const boost::system::error_code &ec,
                                          std::size_t,
-                                         std::shared_ptr<request_helper> helper,
+                                         std::shared_ptr<request_context> context,
                                          std::shared_ptr<response> res) {
   if (ec) {
-    helper->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
     return;
   }
 
   // fill headers
-  std::istream is(&helper->response_buffer_);
+  std::istream is(&context->response_buffer_);
   string_type header;
   while (std::getline(is, header) && (header != "\r")) {
     auto delim = boost::find_first_of(header, ":");
@@ -267,10 +267,10 @@ void client::impl::read_response_headers(const boost::system::error_code &ec,
     res->add_header(key, value);
   }
 
-  helper->connection_->async_read(helper->response_buffer_,
+  context->connection_->async_read(context->response_buffer_,
                                   strand_.wrap([=] (const boost::system::error_code &ec,
                                                     std::size_t bytes_read) {
-                                                 read_response_body(ec, bytes_read, helper, res);
+                                                 read_response_body(ec, bytes_read, context, res);
                                                }));
 }
 
@@ -298,28 +298,28 @@ std::istream &getline_with_newline(std::istream &is, std::string &line) {
 
 void client::impl::read_response_body(const boost::system::error_code &ec,
                                       std::size_t bytes_read,
-                                      std::shared_ptr<request_helper> helper,
+                                      std::shared_ptr<request_context> context,
                                       std::shared_ptr<response> res) {
-  helper->total_bytes_read_ += bytes_read;
-  if (auto progress = helper->options_.progress()) {
-    progress(client_message::transfer_direction::bytes_read, helper->total_bytes_read_);
+  context->total_bytes_read_ += bytes_read;
+  if (auto progress = context->options_.progress()) {
+    progress(client_message::transfer_direction::bytes_read, context->total_bytes_read_);
   }
 
   if (bytes_read == 0) {
-    helper->response_promise_.set_value(*res);
+    context->response_promise_.set_value(*res);
     return;
   }
 
-  std::istream is(&helper->response_buffer_);
+  std::istream is(&context->response_buffer_);
   string_type line;
   while (!getline_with_newline(is, line).eof()) {
     res->append_body(line);
   }
 
-  helper->connection_->async_read(helper->response_buffer_,
+  context->connection_->async_read(context->response_buffer_,
                                   strand_.wrap([=] (const boost::system::error_code &ec,
                                                     std::size_t bytes_read) {
-                                                 read_response_body(ec, bytes_read, helper, res);
+                                                 read_response_body(ec, bytes_read, context, res);
                                                }));
 }
 
@@ -348,7 +348,7 @@ std::future<response> client::execute(request req, request_options options) {
     // TODO factory based on HTTP or HTTPS
     connection = std::make_shared<client_connection::normal_connection>(pimpl_->io_service_);
   }
-  return pimpl_->execute(std::make_shared<request_helper>(connection, req, options));
+  return pimpl_->execute(std::make_shared<request_context>(connection, req, options));
 }
 
 std::future<response> client::get(request req, request_options options) {
