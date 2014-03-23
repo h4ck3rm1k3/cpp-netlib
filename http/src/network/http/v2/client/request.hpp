@@ -37,7 +37,7 @@ namespace network {
 namespace http {
 namespace v2 {
 namespace client_message {
-enum class message_direction {
+enum class transfer_direction {
   bytes_written, bytes_read,
 };
 
@@ -135,12 +135,12 @@ public:
     return max_redirects_;
   }
 
-  request_options &progress(std::function<void (message_direction, std::uint64_t)> handler) {
+  request_options &progress(std::function<void (transfer_direction, std::uint64_t)> handler) {
     progress_handler_ = handler;
     return *this;
   }
 
-  std::function<void (message_direction, std::uint64_t)> progress() const {
+  std::function<void (transfer_direction, std::uint64_t)> progress() const {
     return progress_handler_;
   }
 
@@ -150,7 +150,7 @@ private:
   std::uint64_t read_timeout_;
   std::uint64_t total_timeout_;
   int max_redirects_;
-  std::function<void (message_direction, std::uint64_t)> progress_handler_;
+  std::function<void (transfer_direction, std::uint64_t)> progress_handler_;
 
 };
 

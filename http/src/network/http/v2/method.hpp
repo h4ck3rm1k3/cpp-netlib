@@ -15,38 +15,38 @@
 #include <ostream>
 
 namespace network {
-  namespace http {
-    namespace v2 {
-      enum class method { get, post, put, delete_, head, options, trace, connect, merge, patch, };
+namespace http {
+namespace v2 {
+enum class method { get, post, put, delete_, head, options, trace, connect, merge, patch, };
 
-      inline
-      std::ostream &operator << (std::ostream &os, method m) {
-	  switch (m) {
-	  case method::get:
-	    return os << "GET";
-	  case method::post:
-	    return os << "POST";
-	  case method::put:
-	    return os << "PUT";
-	  case method::delete_:
-	    return os << "DELETE";
-	  case method::head:
-	    return os << "HEAD";
-	  case method::options:
-	    return os << "OPTIONS";
-	  case method::trace:
-	    return os << "TRACE";
-	  case method::connect:
-	    return os << "CONNECT";
-	  case method::merge:
-	    return os << "MERGE";
-	  case method::patch:
-	    return os << "PATCH";
-	  }
-	  return os;
-      }
-    } // namespace v2
-  } // namespace http
+inline
+std::ostream &operator << (std::ostream &os, method m) {
+  switch (m) {
+  case method::get:
+    return os << "GET";
+  case method::post:
+    return os << "POST";
+  case method::put:
+    return os << "PUT";
+  case method::delete_:
+    return os << "DELETE";
+  case method::head:
+    return os << "HEAD";
+  case method::options:
+    return os << "OPTIONS";
+  case method::trace:
+    return os << "TRACE";
+  case method::connect:
+    return os << "CONNECT";
+  case method::merge:
+    return os << "MERGE";
+  case method::patch:
+    return os << "PATCH";
+  }
+  return os;
+}
+} // namespace v2
+} // namespace http
 } // namespace network
 
 

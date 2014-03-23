@@ -21,11 +21,11 @@
 namespace http = network::http;
 
 namespace {
-  std::string get_filename(const std::string& path) {
-    auto index = path.find_last_of('/');
-    auto filename = path.substr(index + 1);
-    return filename.empty() ? "index.html" : filename;
-  }
+std::string get_filename(const std::string& path) {
+  auto index = path.find_last_of('/');
+  auto filename = path.substr(index + 1);
+  return filename.empty() ? "index.html" : filename;
+}
 }  // namespace
 
 int main(int argc, char* argv[]) {

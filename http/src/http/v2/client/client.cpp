@@ -1,4 +1,4 @@
-// Copyright (C) 2013 by Glyn Matthews
+// Copyright (C) 2013, 2014 by Glyn Matthews
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -206,7 +206,7 @@ void client::impl::read_response(const boost::system::error_code &ec,
 
   helper->total_bytes_written_ += bytes_written;
   if (auto progress = helper->options_.progress()) {
-    progress(client_message::message_direction::bytes_written, helper->total_bytes_written_);
+    progress(client_message::transfer_direction::bytes_written, helper->total_bytes_written_);
   }
 
   std::shared_ptr<response> res(new response{});
@@ -302,7 +302,7 @@ void client::impl::read_response_body(const boost::system::error_code &ec,
                                       std::shared_ptr<response> res) {
   helper->total_bytes_read_ += bytes_read;
   if (auto progress = helper->options_.progress()) {
-    progress(client_message::message_direction::bytes_read, helper->total_bytes_read_);
+    progress(client_message::transfer_direction::bytes_read, helper->total_bytes_read_);
   }
 
   if (bytes_read == 0) {
