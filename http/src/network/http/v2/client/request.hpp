@@ -88,7 +88,7 @@ public:
   /**
    * \brief Destructor.
    */
-  ~request_options() noexcept {
+  ~request_options() {
 
   }
 
@@ -184,7 +184,7 @@ public:
   /**
    * \brief Destructor.
    */
-  virtual ~byte_source() noexcept {}
+  virtual ~byte_source() {}
 
   /**
    * \brief Allows the request to read the data into a local
@@ -342,7 +342,7 @@ public:
   /**
    * \brief Destructor.
    */
-  ~request() noexcept {
+  ~request() {
 
   }
 

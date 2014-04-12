@@ -34,16 +34,22 @@ struct request_context {
   boost::asio::streambuf request_buffer_;
   boost::asio::streambuf response_buffer_;
 
+  // TODO configure chunked transfer encoding
+  bool chunked_;
+
   // TODO configure deadline timer for timeouts
+  bool timedout_;
 
   std::uint64_t total_bytes_written_, total_bytes_read_;
 
   request_context(std::shared_ptr<client_connection::async_connection> connection,
-                 request request,
-                 request_options options)
+                  request request,
+                  request_options options)
     : connection_(connection)
     , request_(request)
     , options_(options)
+    , chunked_(false)
+    , timedout_(false)
     , total_bytes_written_(0)
     , total_bytes_read_(0) { }
 
@@ -57,7 +63,7 @@ struct client::impl {
        std::unique_ptr<client_connection::async_connection> mock_connection,
        client_options options);
 
-  ~impl() noexcept;
+  ~impl();
 
   std::future<response> execute(std::shared_ptr<request_context> context);
 
@@ -67,6 +73,10 @@ struct client::impl {
 
   void write_request(const boost::system::error_code &ec,
                      std::shared_ptr<request_context> context);
+
+  void write_body(const boost::system::error_code &ec,
+                  std::size_t bytes_written,
+                  std::shared_ptr<request_context> context);
 
   void read_response(const boost::system::error_code &ec,
                      std::size_t bytes_written,
@@ -117,7 +127,7 @@ client::impl::impl(std::unique_ptr<client_connection::async_resolver> mock_resol
 
 }
 
-client::impl::~impl() noexcept {
+client::impl::~impl() {
   sentinel_.reset();
   lifetime_thread_.join();
 }
@@ -186,14 +196,37 @@ void client::impl::write_request(const boost::system::error_code &ec,
     context->response_promise_.set_exception(std::make_exception_ptr(client_exception(client_error::invalid_request)));
   }
 
+  context->connection_->async_write(context->request_buffer_,
+                                    strand_.wrap([=] (const boost::system::error_code &ec,
+                                                      std::size_t bytes_written) {
+                                                 write_body(ec, bytes_written, context);
+                                                 }));
+}
+
+void client::impl::write_body(const boost::system::error_code &ec,
+                              std::size_t bytes_written,
+                              std::shared_ptr<request_context> context) {
+  if (ec) {
+    context->response_promise_.set_exception(std::make_exception_ptr(std::system_error(ec.value(), std::system_category())));
+    return;
+  }
+
+  context->total_bytes_written_ += bytes_written;
+  if (auto progress = context->options_.progress()) {
+    progress(client_message::transfer_direction::bytes_written, context->total_bytes_written_);
+  }
+
+  std::ostream request_stream(&context->request_buffer_);
   // TODO write payload to request_buffer_
+  if (!request_stream) {
+    context->response_promise_.set_exception(std::make_exception_ptr(client_exception(client_error::invalid_request)));
+  }
 
   context->connection_->async_write(context->request_buffer_,
-                                   strand_.wrap([=] (const boost::system::error_code &ec,
-                                                     std::size_t bytes_written) {
-                                                // TODO write chunked or write body
-                                                read_response(ec, bytes_written, context);
-                                                }));
+                                    strand_.wrap([=] (const boost::system::error_code &ec,
+                                                      std::size_t bytes_written) {
+                                                 read_response(ec, bytes_written, context);
+                                                 }));
 }
 
 void client::impl::read_response(const boost::system::error_code &ec,
@@ -335,7 +368,7 @@ client::client(std::unique_ptr<client_connection::async_resolver> mock_resolver,
 
 }
 
-client::~client() noexcept {
+client::~client() {
   delete pimpl_;
 }
 

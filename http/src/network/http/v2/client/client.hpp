@@ -95,7 +95,7 @@ public:
   /**
    * \brief Destructor.
    */
-  ~client_options() noexcept {
+  ~client_options() {
 
   }
 
@@ -316,7 +316,7 @@ public:
   /**
    * \brief Destructor.
    */
-  ~client() noexcept;
+  ~client();
 
   /**
    * \brief Executes an HTTP request.
