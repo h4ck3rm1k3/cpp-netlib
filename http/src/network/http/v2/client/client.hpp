@@ -29,7 +29,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 namespace client_connection {
 class async_resolver;
 class async_connection;
@@ -177,6 +177,7 @@ public:
    * \brief Tells the client to use a proxy.
    * \param use_proxy If \c true, then the client must use a
    *        proxy, if \c false it doesn't.
+   * \returns \c *this
    */
   client_options &use_proxy(bool use_proxy) {
     use_proxy_ = use_proxy;
@@ -195,6 +196,7 @@ public:
   /**
    * \brief Sets the client timeout in milliseconds.
    * \param timeout The timeout value in milliseconds.
+   * \returns \c *this
    */
   client_options &timeout(std::chrono::milliseconds timeout) {
     timeout_ = timeout;
@@ -212,6 +214,7 @@ public:
   /**
    * \brief Adds an OpenSSL certificate path.
    * \param path The certificate path.
+   * \returns \c *this
    */
   client_options &openssl_certificate_path(std::string path) {
     openssl_certificate_paths_.emplace_back(std::move(path));
@@ -229,6 +232,7 @@ public:
   /**
    * \brief Adds an OpenSSL verify path.
    * \param path The verify path.
+   * \returns \c *this
    */
   client_options &openssl_verify_path(std::string path) {
     openssl_verify_paths_.emplace_back(std::move(path));
@@ -243,20 +247,36 @@ public:
     return openssl_verify_paths_;
   }
 
+  /**
+   * \brief
+   * \returns \c *this
+   */
   client_options &always_verify_peer(bool always_verify_peer) {
     always_verify_peer_ = always_verify_peer;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   bool always_verify_peer() const {
     return always_verify_peer_;
   }
 
+  /**
+   * \brief
+   * \returns \c *this
+   */
   client_options &user_agent(const std::string &user_agent) {
     user_agent_ = user_agent;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   std::string user_agent() const {
     return user_agent_;
   }
@@ -275,6 +295,11 @@ private:
 
 };
 
+/**
+ * \brief
+ * \param lhs
+ * \param rhs
+ */
 inline
 void swap(client_options &lhs, client_options &rhs) noexcept {
   lhs.swap(rhs);

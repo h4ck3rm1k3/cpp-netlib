@@ -16,7 +16,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 enum class method { get, post, put, delete_, head, options, trace, connect, merge, patch, };
 
 inline

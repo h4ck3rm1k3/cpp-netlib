@@ -25,7 +25,7 @@
 
 namespace network {
   namespace http {
-    namespace v2 {
+    inline namespace v2 {
       namespace client_connection {
         /**
          * \class tcp_resolver network/http/v2/client/connection/tcp_resolver.hpp

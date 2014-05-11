@@ -18,7 +18,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 /**
  * \ingroup http_client
  * \enum client_error network/http/v2/client/client_errors.hpp network/http/v2/client.hpp
@@ -29,8 +29,8 @@ enum class client_error {
   invalid_request,
 
   // response
-    invalid_response,
-    };
+  invalid_response,
+};
 
 /**
  * \brief Gets the error category for HTTP client errors.

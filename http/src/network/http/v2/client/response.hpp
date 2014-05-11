@@ -25,7 +25,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 namespace client_message {
 /**
  * \ingroup http_client
@@ -170,10 +170,18 @@ public:
     headers_.push_back(std::make_pair(name, value));
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   const_headers_iterator headers_begin() const {
     return std::begin(headers_);
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   const_headers_iterator headers_end() const {
     return std::end(headers_);
   }
@@ -187,10 +195,18 @@ public:
     return boost::make_iterator_range(headers_begin(), headers_end());
   }
 
+  /**
+   * \brief
+   * \param body
+   */
   void append_body(string_type body) {
     body_.append(body);
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   string_type body() const {
     return body_;
   }

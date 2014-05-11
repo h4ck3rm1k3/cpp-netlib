@@ -20,7 +20,7 @@
 
 namespace network {
   namespace http {
-    namespace v2 {
+    inline namespace v2 {
       namespace client_connection {
         /**
          * \class async_connection network/http/v2/client/connection/async_connection.hpp

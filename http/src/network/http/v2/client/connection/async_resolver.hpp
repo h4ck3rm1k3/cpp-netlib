@@ -18,7 +18,7 @@
 
 namespace network {
   namespace http {
-    namespace v2 {
+    inline namespace v2 {
       namespace client_connection {
         /**
          * \class async_resolver network/http/v2/client/connection/async_resolver.hpp

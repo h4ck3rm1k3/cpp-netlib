@@ -35,7 +35,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 namespace client_message {
 enum class transfer_direction {
   bytes_written, bytes_read,
@@ -92,6 +92,10 @@ public:
 
   }
 
+  /**
+   * \brief
+   * \param other
+   */
   void swap(request_options &other) noexcept {
     using std::swap;
     swap(resolve_timeout_, other.resolve_timeout_);
@@ -99,47 +103,87 @@ public:
     swap(total_timeout_, other.total_timeout_);
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request_options &resolve_timeout(std::uint64_t resolve_timeout) {
     resolve_timeout_ = resolve_timeout;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   std::uint64_t resolve_timeout() const {
     return resolve_timeout_;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request_options &read_timeout(std::uint64_t read_timeout) {
     read_timeout_ = read_timeout;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   std::uint64_t read_timeout() const {
     return read_timeout_;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request_options &total_timeout(std::uint64_t total_timeout) {
     total_timeout_ = total_timeout;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   std::uint64_t total_timeout() const {
     return total_timeout_;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request_options &max_redirects(int max_redirects) {
     max_redirects_ = max_redirects;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   int max_redirects() const {
     return max_redirects_;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request_options &progress(std::function<void (transfer_direction, std::uint64_t)> handler) {
     progress_handler_ = handler;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   std::function<void (transfer_direction, std::uint64_t)> progress() const {
     return progress_handler_;
   }
@@ -154,6 +198,11 @@ private:
 
 };
 
+/**
+ * \brief
+ * \param lhs
+ * \param rhs
+ */
 inline
 void swap(request_options &lhs, request_options &rhs) noexcept {
   lhs.swap(rhs);
@@ -360,12 +409,20 @@ public:
     swap(byte_source_, other.byte_source_);
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request &url(const uri &url) {
     // throw invalid_url
     url_ = url;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   uri url() const {
     return url_;
   }
@@ -431,11 +488,19 @@ public:
     return version_;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   request &body(std::shared_ptr<byte_source> byte_source) {
     byte_source_ = byte_source;
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   template <class Handler>
   void body(size_type length, Handler &&handler) {
     string_type body;
@@ -455,6 +520,10 @@ public:
     return *this;
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   boost::optional<string_type> header(const string_type &name) {
     for (auto header : headers_) {
       if (boost::iequals(header.first, name)) {
@@ -464,10 +533,18 @@ public:
     return boost::optional<string_type>();
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   const_headers_iterator headers_begin() const {
     return std::begin(headers_);
   }
 
+  /**
+   * \brief
+   * \returns
+   */
   const_headers_iterator headers_end() const {
     return std::end(headers_);
   }
@@ -520,6 +597,10 @@ private:
   }
 };
 
+/**
+ * \brief
+ * \returns
+ */
 inline
 void swap(request &lhs, request &rhs) noexcept {
   lhs.swap(rhs);

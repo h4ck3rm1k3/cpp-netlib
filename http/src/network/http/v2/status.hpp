@@ -20,7 +20,7 @@
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 namespace status {
 /**
  * \ingroup http
@@ -101,7 +101,7 @@ struct hash<network::http::v2::status::code> {
 
 namespace network {
 namespace http {
-namespace v2 {
+inline namespace v2 {
 namespace status {
 /**
  * \ingroup http_client
