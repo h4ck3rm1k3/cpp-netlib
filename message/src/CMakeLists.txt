@@ -10,18 +10,18 @@ include_directories(${CPP-NETLIB_SOURCE_DIR}/uri/src ${CPP-NETLIB_SOURCE_DIR}/me
 set(CPP-NETLIB_MESSAGE_SRCS
     message.cpp)
 
-add_library(cppnetlib-message ${CPP-NETLIB_MESSAGE_SRCS})
-target_link_libraries(cppnetlib-message network-uri)
+add_library(network-message ${CPP-NETLIB_MESSAGE_SRCS})
+target_link_libraries(network-message network-uri)
 
 set(CPP-NETLIB_MESSAGE_DIRECTIVES_SRCS
     directives.cpp)
 
-add_library(cppnetlib-message-directives ${CPP-NETLIB_MESSAGE_DIRECTIVES_SRCS})
+add_library(network-message-directives ${CPP-NETLIB_MESSAGE_DIRECTIVES_SRCS})
 
 set(CPP-NETLIB_MESSAGE_WRAPPERS_SRCS
     wrappers.cpp)
 
-add_library(cppnetlib-message-wrappers ${CPP-NETLIB_MESSAGE_WRAPPERS_SRCS})
+add_library(network-message-wrappers ${CPP-NETLIB_MESSAGE_WRAPPERS_SRCS})
 
 # prepend current directory to make paths absolute
 prependToElements( "${CMAKE_CURRENT_SOURCE_DIR}/"

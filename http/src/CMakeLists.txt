@@ -24,24 +24,24 @@ set(CPP-NETLIB_HTTP_MESSAGE_SRCS
   http/response.cpp)
 
 if(NOT CPP-NETLIB_BUILD_SINGLE_LIB)
-  add_library(cppnetlib-http-message ${CPP-NETLIB_HTTP_MESSAGE_SRCS})
-  target_link_libraries(cppnetlib-http-message
+  add_library(network-http-message ${CPP-NETLIB_HTTP_MESSAGE_SRCS})
+  target_link_libraries(network-http-message
     ${Boost_LIBRARIES}
-    cppnetlib-message)
+    network-message)
 endif()
 
 set(CPP-NETLIB_HTTP_MESSAGE_WRAPPERS_SRCS
     http/message/wrappers.cpp)
 
 if(NOT CPP-NETLIB_BUILD_SINGLE_LIB)
-  add_library(cppnetlib-http-message-wrappers ${CPP-NETLIB_HTTP_MESSAGE_WRAPPERS_SRCS})
+  add_library(network-http-message-wrappers ${CPP-NETLIB_HTTP_MESSAGE_WRAPPERS_SRCS})
 endif()
 
 set(CPP-NETLIB_CONSTANTS_SRCS
     constants.cpp)
 
 if(NOT CPP-NETLIB_BUILD_SINGLE_LIB)
-  add_library(cppnetlib-constants ${CPP-NETLIB_CONSTANTS_SRCS})
+  add_library(network-constants ${CPP-NETLIB_CONSTANTS_SRCS})
 endif()
 
 # Server implementation files.
@@ -51,7 +51,7 @@ set(CPP-NETLIB_HTTP_SERVER_SRCS
   http/server/dynamic_dispatcher.cpp)
 
 if (NOT CPP-NETLIB_BUILD_SINGLE_LIB)
-  add_library(cppnetlib-http-server ${CPP-NETLIB_HTTP_SERVER_SRCS})
+  add_library(network-http-server ${CPP-NETLIB_HTTP_SERVER_SRCS})
 endif()
 
 # HTTP client

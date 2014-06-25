@@ -9,7 +9,7 @@ set(CPP-NETLIB_CONCURRENCY_SRCS
     thread_pool.cpp)
 
 if(NOT CPP-NETLIB_BUILD_SINGLE_LIB)
-  add_library(network_concurrency ${CPP-NETLIB_CONCURRENCY_SRCS})
+  add_library(network-concurrency ${CPP-NETLIB_CONCURRENCY_SRCS})
 endif()
 
 # prepend current directory to make paths absolute

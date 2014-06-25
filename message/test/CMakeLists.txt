@@ -12,9 +12,9 @@ if (CPP-NETLIB_BUILD_TESTS)
   if(CPP-NETLIB_BUILD_SINGLE_LIB)
     set(link_cppnetlib_lib cppnetlib)
   else()
-    set(link_cppnetlib_lib cppnetlib-message
-      cppnetlib-message-directives
-      cppnetlib-message-wrappers)
+    set(link_cppnetlib_lib network-message
+      network-message-directives
+      network-message-wrappers)
   endif()
   foreach (test ${TESTS})
     add_executable(cpp-netlib-${test} ${test}.cpp)

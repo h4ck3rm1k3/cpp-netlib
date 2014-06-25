@@ -15,4 +15,6 @@ include_directories(${CPP-NETLIB_SOURCE_DIR}/mime/src)
 
 add_executable ( mime-roundtrip mime-roundtrip.cpp )
 target_link_libraries ( mime-roundtrip )
+set_target_properties(mime-roundtrip
+  PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CPP-NETLIB_BINARY_DIR}/tests)
 add_test ( mime-roundtrip mime-roundtrip )

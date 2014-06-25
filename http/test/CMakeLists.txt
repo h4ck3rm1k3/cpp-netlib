@@ -29,20 +29,20 @@ set( CPPNETLIB_LIBRARIES cppnetlib )
 set( CPPNETLIB_SERVER_LIBRARIES ${CPPNETLIB_LIBRARIES} )
 if(NOT CPP-NETLIB_BUILD_SINGLE_LIB)
     set( CPPNETLIB_LIBRARIES
-        cppnetlib-message
-        cppnetlib-message-wrappers
-        cppnetlib-http-message
-        cppnetlib-http-message-wrappers
+        network-message
+        network-message-wrappers
+        network-http-message
+        network-http-message-wrappers
         network-uri
-        cppnetlib-constants )
+        network-constants )
 
 #    set( CPPNETLIB_CLIENT_LIBRARIES
 #        ${CPPNETLIB_LIBRARIES}
-#        cppnetlib-http-client
-#        cppnetlib-http-client-connections )
+#        network-http-client
+#        network-http-client-connections )
 
     set( CPPNETLIB_SERVER_LIBRARIES
-         cppnetlib-http-server )
+         network-http-server )
 endif()
 
 

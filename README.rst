@@ -1,6 +1,9 @@
 C++ Network Library
 ===================
 
+.. image:: https://travis-ci.org/cpp-netlib/cpp-netlib.png?branch=master
+  :target: https://travis-ci.org/cpp-netlib/cpp-netlib
+
 Introduction
 ------------
 

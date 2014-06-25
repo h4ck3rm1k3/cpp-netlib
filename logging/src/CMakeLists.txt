@@ -8,7 +8,7 @@ include_directories(${CPP-NETLIB_SOURCE_DIR}/logging/src ${CPP-NETLIB_SOURCE_DIR
 set(CPP-NETLIB_LOGGING_SRCS
     logging.cpp)
 
-add_library(cppnetlib-logging ${CPP-NETLIB_LOGGING_SRCS})
+add_library(network-logging ${CPP-NETLIB_LOGGING_SRCS})
 
 # prepend current directory to make paths absolute
 prependToElements( "${CMAKE_CURRENT_SOURCE_DIR}/"
